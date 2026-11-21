@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Was läuft im Radio?</title>
+<meta name="description" content="Wie viel Musik mit deutschem Text sieben Radiosender spielen, woher sie kommt und wie oft sie sich wiederholt. Ausgewertet aus den öffentlichen Playlists.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f1b16'/%3E%3Cpath d='M6 22h20M8 22v-3M12 22v-3M16 22v-3M20 22v-3M24 22v-3' stroke='%23efe9de' stroke-width='1.5'/%3E%3Cpath d='M18 23V8' stroke='%23f0673f' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<script>try { const t = localStorage.getItem("theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch {}</script>
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<header class="wrap hero">
+  <div class="topbar">
+    <p class="kicker" id="updated"></p>
+    <button type="button" class="theme" id="theme" aria-label="Dunkles Design" title="Dunkles Design">
+      <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+      <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    </button>
+  </div>
+  <h1>Was läuft im Radio?</h1>
+  <p class="lede" id="lede">Ausgewertet aus den öffentlichen Playlists von sieben Radiosendern.</p>
+  <p class="meta" id="stamp"></p>
+  <figure class="dial" id="dial" hidden>
+    <figcaption>Anteil der Songs mit deutschem Text <span id="dial-range"></span></figcaption>
+    <div class="dial-marks" id="dial-marks"></div>
+    <div class="dial-ticks" id="dial-ticks"></div>
+    <div class="dial-nums" id="dial-nums"></div>
+    <div class="dial-list" id="dial-list"></div>
+  </figure>
+</header>
+
+<main class="wrap" id="main">
+  <p class="loading" id="loading">Lade Daten…</p>
+
+  <section id="s-compare" hidden>
+    <h2>Die Sender im Vergleich</h2>
+    <div class="scroll block"><table class="compare" id="compare"></table></div>
+    <ol class="footnotes" id="footnotes"></ol>
+    <p class="define" id="define"></p>
+  </section>
+
+  <section id="s-trend" hidden>
+    <h2>Deutsch im Verlauf</h2>
+    <p class="intro" id="trend-intro"></p>
+    <div class="chart-card block" id="trend"></div>
+  </section>
+
+  <section id="s-mix" hidden>
+    <h2>Sprache und Herkunft</h2>
+    <p class="intro" id="mix-intro"></p>
+    <div class="tabs block" role="tablist" id="mix-tabs">
+      <button role="tab" aria-selected="true" data-mix="languages">Sprache</button>
+      <button role="tab" aria-selected="false" data-mix="countries">Herkunft</button>
+    </div>
+    <div class="legend" id="mix-legend"></div>
+    <div class="stacks" id="mix"></div>
+  </section>
+
+  <section id="s-hours" hidden>
+    <h2>Musik rund um die Uhr</h2>
+    <p class="intro">Songs pro Stunde im Schnitt. Je kräftiger das Feld, desto mehr Musik. Blasse Stunden gehören
+      Morningshow, Nachrichten und Wortsendungen.</p>
+    <div class="scroll block"><table class="hours" id="hours"></table></div>
+    <div class="legend" id="hours-key"><span><i class="gap"></i>Keine Playlist veröffentlicht, fehlt in allen Zahlen</span></div>
+  </section>
+
+  <section id="s-top" hidden>
+    <h2>Am meisten gespielt</h2>
+    <p class="intro">Alle Sender zusammen, Einsätze pro Woche im Schnitt.</p>
+    <div class="tabs block" role="tablist" id="top-tabs">
+      <button role="tab" aria-selected="true" data-top="songs">Songs</button>
+      <button role="tab" aria-selected="false" data-top="artists">Künstler:innen</button>
+    </div>
+    <div class="list-head"><span id="top-col"></span><span>pro Woche</span></div>
+    <ol class="top" id="top"></ol>
+    <button type="button" class="more" id="top-more" hidden></button>
+
+    <div class="ones-head" id="ones-head"><h3>Nummer eins je Sender</h3><span>pro Woche</span></div>
+    <ul class="ones" id="ones"></ul>
+  </section>
+
+  <section id="s-overlap" hidden>
+    <h2>Wer spielt, was die anderen spielen?</h2>
+    <p class="intro">Anteil der Songs eines Senders (Zeile), die auch beim Sender in der Spalte laufen.</p>
+    <div class="scroll block"><table class="heat" id="overlap"></table></div>
+  </section>
+
+  <section id="s-quality" hidden>
+    <h2>Wie genau sind die Daten?</h2>
+    <p class="intro">Alles beruht auf den Playlists, die die Sender selbst veröffentlichen, und auf einer automatischen
+      Zuordnung. Beides hat Lücken.</p>
+    <dl class="notes" id="quality"></dl>
+  </section>
+</main>
+
+<footer class="wrap foot">
+  <h2>Wie das entsteht</h2>
+  <p>Ein kleines Programm liest rund um die Uhr die öffentlichen Playlists der Sender mit und ergänzt jeden Song um
+    offene Daten: Künstler:innen und Herkunft aus <a href="https://musicbrainz.org">MusicBrainz</a> und
+    <a href="https://www.wikidata.org">Wikidata</a>, Erscheinungsjahr aus MusicBrainz und
+    <a href="https://www.deezer.com">Deezer</a>, die Sprache aus den Songtexten von
+    <a href="https://lrclib.net">LRCLIB</a>. Gezählt wird nur Musik, keine Jingles oder Sendungen.</p>
+  <p>Ein Hobbyprojekt ohne Verbindung zu den Sendern. Die Seite wird alle paar Stunden neu berechnet.</p>
+  <p class="meta" id="foot-stamp"></p>
+</footer>
+<script src="site.js"></script>
+</body>
+</html>
